@@ -4,7 +4,7 @@ import { getServerClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/supabase/env";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 120;
+export const maxDuration = 60; // limite do plano gratuito da Vercel
 
 // limite simples por usuário/IP: 20 perguntas a cada 10 minutos (por instância)
 const WINDOW = 10 * 60e3, LIMIT = 20;
