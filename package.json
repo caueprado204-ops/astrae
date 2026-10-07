@@ -1,0 +1,40 @@
+{
+  "name": "astrae",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ASTRAE — Advanced Space & Earth Research Environment",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --conditions=react-server --import tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.132.0",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.45.4",
+    "echarts": "^5.5.1",
+    "echarts-for-react": "^3.0.2",
+    "fast-xml-parser": "^4.5.0",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.446.0",
+    "maplibre-gl": "^4.7.1",
+    "next": "^14.2.35",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.12",
+    "@types/node": "^20.16.10",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "tsx": "^4.23.15",
+    "typescript": "^5.6.2"
+  }
+}

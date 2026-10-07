@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  ASTRAE tokens
+  bg     #070B14  tinta azul profunda (não preto neutro: céu noturno)
+  panel  #0D1424  superfície de instrumento
+  line   #1C2740  divisórias
+  ink    #E6ECF7  texto
+  accent #6FD3FF  dados / Terra
+  mars   #C4552B  óxido de ferro — exclusivo para Marte
+  nino   #F2994A / nina #4A90E2 — escala divergente ENSO
+*/
+:root, :root[data-theme="dark"] {
+  --bg: 7 11 20;
+  --panel: 13 20 36;
+  --panel2: 18 27 47;
+  --line: 28 39 64;
+  --ink: 230 236 247;
+  --dim: 138 151 178;
+  --faint: 84 97 125;
+  --accent: 111 211 255;
+  --mars: 196 85 43;
+  --ok: 76 195 138;
+  --warn: 232 176 75;
+  --bad: 229 72 77;
+  --nino: 242 153 74;
+  --nina: 74 144 226;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: 245 247 251;
+  --panel: 255 255 255;
+  --panel2: 238 242 249;
+  --line: 214 222 236;
+  --ink: 17 26 44;
+  --dim: 82 96 124;
+  --faint: 140 152 176;
+  --accent: 0 122 184;
+  --mars: 170 68 30;
+  --ok: 22 140 88;
+  --warn: 176 118 10;
+  --bad: 200 40 50;
+  --nino: 214 110 30;
+  --nina: 30 104 200;
+  color-scheme: light;
+}
+
+html, body { background: rgb(var(--bg)); color: rgb(var(--ink)); }
+body {
+  font-family: "Inter Tight", Inter, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+:root[data-theme="dark"] body, :root:not([data-theme]) body {
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgb(230 236 247 / .35), transparent 60%),
+    radial-gradient(1px 1px at 72% 8%, rgb(230 236 247 / .25), transparent 60%),
+    radial-gradient(1px 1px at 88% 64%, rgb(230 236 247 / .2), transparent 60%),
+    radial-gradient(1px 1px at 34% 82%, rgb(230 236 247 / .2), transparent 60%),
+    radial-gradient(1200px 600px at 80% -10%, rgb(111 211 255 / .06), transparent 70%);
+  background-attachment: fixed;
+}
+
+.font-display { font-family: "Space Grotesk", "Inter Tight", sans-serif; letter-spacing: -0.02em; }
+.tabular { font-variant-numeric: tabular-nums; }
+
+:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; border-radius: 4px; }
+
+@layer components {
+  .panel { @apply rounded-md border border-line bg-panel; }
+  .btn { @apply inline-flex items-center gap-2 rounded-md border border-line bg-panel2 px-3 py-1.5 text-sm text-ink transition-colors hover:border-accent/60 disabled:opacity-50; }
+  .btn-primary { @apply inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-medium text-bg transition-opacity hover:opacity-90 disabled:opacity-50; }
+  .input { @apply w-full rounded-md border border-line bg-bg/60 px-3 py-2 text-sm text-ink placeholder:text-faint focus:border-accent/70 focus:outline-none; }
+  .label { @apply text-xs text-dim; }
+  .readout { @apply font-mono tabular text-ink; }
+}
+
+.maplibregl-ctrl-attrib, .leaflet-control-attribution { font-size: 10px !important; }
+.leaflet-container { background: rgb(var(--bg)); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+@keyframes stripe-in { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.stripe { transform-origin: bottom; animation: stripe-in .9s cubic-bezier(.2,.8,.2,1) both; }
