@@ -10,6 +10,7 @@ export function GET() {
     supabase: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
     persistentCache: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
     geocoderContact: Boolean(process.env.GEOCODER_CONTACT),
-    ai: Boolean(process.env.ANTHROPIC_API_KEY)
+    ai: Boolean(process.env.ANTHROPIC_API_KEY),
+    gemini: Boolean(process.env.GEMINI_API_KEY)
   });
 }

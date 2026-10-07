@@ -2,10 +2,32 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { SourceRegistry, TOOLS, runTool, type ConsultedSource } from "./tools";
 import { sanitizeCitations } from "./citations";
+import { fetchJson } from "@/lib/http";
 
-export const aiConfigured = () => Boolean(process.env.ANTHROPIC_API_KEY);
-/** Modelo padrão recomendado pela documentação da Anthropic; ajustável por ANTHROPIC_MODEL. */
-export const aiModel = () => process.env.ANTHROPIC_MODEL || "claude-opus-5-5";
+/**
+ * O ASTRAE AI funciona com dois provedores, escolhidos pela chave configurada no servidor:
+ *  - Google Gemini (GEMINI_API_KEY) — tem plano gratuito nos modelos Flash;
+ *  - Anthropic Claude (ANTHROPIC_API_KEY) — pago por uso.
+ * Com as duas chaves, AI_PROVIDER ("gemini" | "anthropic") decide; sem ele, usa o Gemini.
+ * As regras de integridade (só dados das ferramentas + verificação de citações) são as mesmas.
+ */
+export type Provider = "gemini" | "anthropic";
+
+export function aiProvider(): Provider | null {
+  const g = Boolean(process.env.GEMINI_API_KEY), a = Boolean(process.env.ANTHROPIC_API_KEY);
+  const pref = process.env.AI_PROVIDER;
+  if (pref === "anthropic" && a) return "anthropic";
+  if (pref === "gemini" && g) return "gemini";
+  return g ? "gemini" : a ? "anthropic" : null;
+}
+export const aiConfigured = () => aiProvider() !== null;
+
+/** Modelos padrão: Gemini Flash estável recomendado pelo Google para novos projetos; Opus recomendado pela Anthropic. */
+export function aiModel(p: Provider | null = aiProvider()) {
+  if (p === "gemini") return process.env.GEMINI_MODEL || "gemini-3.8-flash";
+  if (p === "anthropic") return process.env.ANTHROPIC_MODEL || "claude-opus-5-5";
+  return "";
+}
 
 const system = () => `Você é o ASTRAE AI, assistente científico da plataforma ASTRAE (Advanced Space & Earth Research Environment).
 
@@ -29,16 +51,40 @@ export interface AgentAnswer {
   sources: (ConsultedSource & { cited: boolean })[];
   trace: ToolTrace[];
   model: string;
+  provider: Provider;
   removedCitations: string[];
   usage: { input_tokens: number; output_tokens: number };
 }
 
 const MAX_STEPS = 8;
+const LIMIT_MSG = "Não consegui concluir a análise dentro do limite de consultas. Reformule a pergunta de forma mais específica.";
 
-type MessagesClient = { messages: { create: (p: Anthropic.MessageCreateParamsNonStreaming) => Promise<Anthropic.Message> } };
+/** Executa uma chamada de ferramenta e registra no rastro — comum aos dois provedores. */
+async function execTool(name: string, input: Record<string, unknown>, reg: SourceRegistry, trace: ToolTrace[]) {
+  const t0 = Date.now();
+  try {
+    const out = await runTool(name, input, reg);
+    trace.push({ tool: name, input, ok: true, ms: Date.now() - t0 });
+    return { ok: true as const, out };
+  } catch (e) {
+    const msg = (e as Error).message;
+    trace.push({ tool: name, input, ok: false, error: msg, ms: Date.now() - t0 });
+    return { ok: false as const, error: `Data source temporarily unavailable: ${msg}` };
+  }
+}
 
-export async function askAstrae(history: ChatTurn[], client: MessagesClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })): Promise<AgentAnswer> {
-  const model = aiModel();
+function finish(finalText: string, reg: SourceRegistry, trace: ToolTrace[], model: string, provider: Provider, usage: AgentAnswer["usage"]): AgentAnswer {
+  // Verificação de integridade: remove citações a fontes que não foram de fato consultadas.
+  const { answer, removed, cited } = sanitizeCitations(finalText, new Set(reg.list.map((s) => s.id)));
+  return { answer, sources: reg.list.map((s) => ({ ...s, cited: cited.has(s.id) })), trace, model, provider, removedCitations: removed, usage };
+}
+
+/* ───────────────────────── Anthropic ───────────────────────── */
+
+export type MessagesClient = { messages: { create: (p: Anthropic.MessageCreateParamsNonStreaming) => Promise<Anthropic.Message> } };
+
+export async function askWithAnthropic(history: ChatTurn[], client: MessagesClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })): Promise<AgentAnswer> {
+  const model = aiModel("anthropic");
   const reg = new SourceRegistry();
   const trace: ToolTrace[] = [];
   const usage = { input_tokens: 0, output_tokens: 0 };
@@ -55,22 +101,101 @@ export async function askAstrae(history: ChatTurn[], client: MessagesClient = ne
     messages.push({ role: "assistant", content: res.content });
     const uses = res.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
     const results = await Promise.all(uses.map(async (u): Promise<Anthropic.ToolResultBlockParam> => {
-      const t0 = Date.now();
-      try {
-        const out = await runTool(u.name, (u.input || {}) as Record<string, unknown>, reg);
-        trace.push({ tool: u.name, input: u.input, ok: true, ms: Date.now() - t0 });
-        return { type: "tool_result", tool_use_id: u.id, content: JSON.stringify(out) };
-      } catch (e) {
-        const msg = (e as Error).message;
-        trace.push({ tool: u.name, input: u.input, ok: false, error: msg, ms: Date.now() - t0 });
-        return { type: "tool_result", tool_use_id: u.id, content: `Data source temporarily unavailable: ${msg}`, is_error: true };
-      }
+      const r = await execTool(u.name, (u.input || {}) as Record<string, unknown>, reg, trace);
+      return r.ok
+        ? { type: "tool_result", tool_use_id: u.id, content: JSON.stringify(r.out) }
+        : { type: "tool_result", tool_use_id: u.id, content: r.error, is_error: true };
     }));
     messages.push({ role: "user", content: results });
-    if (step === MAX_STEPS - 1) finalText ||= "Não consegui concluir a análise dentro do limite de consultas. Reformule a pergunta de forma mais específica.";
+    if (step === MAX_STEPS - 1) finalText ||= LIMIT_MSG;
   }
+  return finish(finalText, reg, trace, model, "anthropic", usage);
+}
 
-  // Verificação de integridade: remove citações a fontes que não foram de fato consultadas.
-  const { answer, removed, cited } = sanitizeCitations(finalText, new Set(reg.list.map((s) => s.id)));
-  return { answer, sources: reg.list.map((s) => ({ ...s, cited: cited.has(s.id) })), trace, model, removedCitations: removed, usage };
+/* ───────────────────────── Google Gemini ───────────────────────── */
+// REST generateContent: https://ai.google.dev/api/generate-content
+
+interface GeminiPart { text?: string; thought?: boolean; functionCall?: { name: string; args?: Record<string, unknown>; id?: string }; [k: string]: unknown }
+interface GeminiContent { role: "user" | "model"; parts: GeminiPart[] }
+interface GeminiResponse {
+  candidates?: { content?: GeminiContent; finishReason?: string }[];
+  promptFeedback?: { blockReason?: string };
+  usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
+}
+export type GeminiCaller = (model: string, body: unknown) => Promise<GeminiResponse>;
+
+/** Converte o JSON Schema das ferramentas para o subconjunto aceito pelo Gemini. */
+function geminiSchema(s: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const k of ["type", "description", "enum", "required"]) if (s[k] !== undefined) out[k] = s[k];
+  if (s.items) out.items = geminiSchema(s.items as Record<string, unknown>);
+  if (s.properties) out.properties = Object.fromEntries(Object.entries(s.properties as Record<string, Record<string, unknown>>).map(([k, v]) => [k, geminiSchema(v)]));
+  return out;
+}
+
+export const GEMINI_TOOLS = [{
+  functionDeclarations: TOOLS.map((t) => {
+    const params = t.input_schema as unknown as Record<string, unknown>;
+    const hasProps = params.properties && Object.keys(params.properties as object).length > 0;
+    // ferramentas sem argumentos são declaradas sem "parameters" (objeto vazio é rejeitado)
+    return hasProps ? { name: t.name, description: t.description, parameters: geminiSchema(params) } : { name: t.name, description: t.description };
+  })
+}];
+
+const callGeminiRest: GeminiCaller = (model, body) =>
+  fetchJson<GeminiResponse>(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY || "" },
+    body: JSON.stringify(body),
+    timeoutMs: 50000
+  });
+
+export async function askWithGemini(history: ChatTurn[], call: GeminiCaller = callGeminiRest): Promise<AgentAnswer> {
+  const model = aiModel("gemini");
+  const reg = new SourceRegistry();
+  const trace: ToolTrace[] = [];
+  const usage = { input_tokens: 0, output_tokens: 0 };
+  const contents: GeminiContent[] = history.map((t) => ({ role: t.role === "assistant" ? "model" : "user", parts: [{ text: t.content }] }));
+
+  let finalText = "";
+  for (let step = 0; step < MAX_STEPS; step++) {
+    const res = await call(model, {
+      systemInstruction: { parts: [{ text: system() }] },
+      contents,
+      tools: GEMINI_TOOLS,
+      toolConfig: { functionCallingConfig: { mode: "AUTO" } },
+      generationConfig: { maxOutputTokens: 4096 }
+    });
+    usage.input_tokens += res.usageMetadata?.promptTokenCount ?? 0;
+    usage.output_tokens += res.usageMetadata?.candidatesTokenCount ?? 0;
+    const content = res.candidates?.[0]?.content;
+    if (!content) {
+      const why = res.promptFeedback?.blockReason || res.candidates?.[0]?.finishReason || "resposta vazia";
+      throw new Error(`O Gemini não retornou resposta (${why}).`);
+    }
+    const parts = content.parts || [];
+    finalText = parts.filter((p) => typeof p.text === "string" && !p.thought).map((p) => p.text).join("\n").trim();
+    const calls = parts.filter((p) => p.functionCall);
+    if (calls.length === 0) break;
+
+    // devolve o turno do modelo sem alterações (preserva assinaturas de raciocínio exigidas pelo Gemini)
+    contents.push({ role: "model", parts });
+    const responses = await Promise.all(calls.map(async (p) => {
+      const fc = p.functionCall!;
+      const r = await execTool(fc.name, fc.args || {}, reg, trace);
+      return { functionResponse: { name: fc.name, ...(fc.id ? { id: fc.id } : {}), response: r.ok ? { result: r.out } : { error: r.error } } };
+    }));
+    contents.push({ role: "user", parts: responses });
+    if (step === MAX_STEPS - 1) finalText ||= LIMIT_MSG;
+  }
+  return finish(finalText, reg, trace, model, "gemini", usage);
+}
+
+/* ───────────────────────── Entrada única ───────────────────────── */
+
+export async function askAstrae(history: ChatTurn[]): Promise<AgentAnswer> {
+  const p = aiProvider();
+  if (p === "gemini") return askWithGemini(history);
+  if (p === "anthropic") return askWithAnthropic(history);
+  throw new Error("Nenhum provedor de IA configurado.");
 }

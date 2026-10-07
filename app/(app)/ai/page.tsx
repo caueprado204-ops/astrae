@@ -61,7 +61,7 @@ function RichText({ text, sources }: { text: string; sources: Source[] }) {
 }
 
 export default function AstraeAI() {
-  const [cfg, setCfg] = useState<{ configured: boolean; model: string | null } | null>(null);
+  const [cfg, setCfg] = useState<{ configured: boolean; provider: string | null; model: string | null } | null>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -69,7 +69,7 @@ export default function AstraeAI() {
   const { sb, user, configured: dbConfigured } = useUser();
   const end = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { fetch("/api/ai").then((r) => r.json()).then(setCfg).catch(() => setCfg({ configured: false, model: null })); }, []);
+  useEffect(() => { fetch("/api/ai").then((r) => r.json()).then(setCfg).catch(() => setCfg({ configured: false, provider: null, model: null })); }, []);
   useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [turns, busy]);
 
   async function ask(q: string) {
@@ -95,7 +95,8 @@ export default function AstraeAI() {
       {cfg && !cfg.configured && (
         <div className="panel p-5 text-sm">
           <p className="text-warn">○ ASTRAE AI ainda não configurado</p>
-          <p className="mt-2 text-dim">Adicione <code className="font-mono text-ink">ANTHROPIC_API_KEY</code> no <code className="font-mono text-ink">.env.local</code> do servidor (chave em console.anthropic.com) e reinicie. Opcionalmente defina <code className="font-mono text-ink">ANTHROPIC_MODEL</code>.</p>
+          <p className="mt-2 text-dim">Opção gratuita: crie uma chave em <span className="text-ink">aistudio.google.com</span> e adicione <code className="font-mono text-ink">GEMINI_API_KEY</code> nas variáveis de ambiente do servidor (na Vercel: Settings → Environment Variables, depois Redeploy).</p>
+          <p className="mt-2 text-dim">Opção paga: <code className="font-mono text-ink">ANTHROPIC_API_KEY</code> (console.anthropic.com).</p>
         </div>
       )}
 
@@ -135,7 +136,7 @@ export default function AstraeAI() {
               className="max-h-40 min-h-[40px] flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-faint" aria-label="Pergunta" />
             <button className="btn-primary" disabled={busy || !input.trim()} aria-label="Enviar pergunta"><Send size={15} /></button>
           </form>
-          <p className="mt-2 text-center text-[11px] text-faint">Respostas geradas por IA a partir dos dados consultados. Confira sempre a fonte original antes de usar em trabalhos.{cfg.model ? ` Modelo: ${cfg.model}.` : ""}</p>
+          <p className="mt-2 text-center text-[11px] text-faint">Respostas geradas por IA a partir dos dados consultados. Confira sempre a fonte original antes de usar em trabalhos.{cfg.model ? ` Modelo: ${cfg.model}${cfg.provider === "gemini" ? " (Google)" : " (Anthropic)"}.` : ""}</p>
         </>
       )}
     </div>

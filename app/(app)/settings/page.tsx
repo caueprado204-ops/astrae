@@ -65,7 +65,8 @@ export default function SettingsPage() {
       <section className="panel p-4">
         <h2 className="font-medium">ASTRAE AI</h2>
         <ul className="mt-1 divide-y divide-line">
-          {row("ANTHROPIC_API_KEY", cfg?.ai, "Assistente que responde só com dados consultados nas fontes oficiais e cita cada uma. Modelo ajustável por ANTHROPIC_MODEL.")}
+          {row("GEMINI_API_KEY", cfg?.gemini, "Opção gratuita (Google AI Studio). Modelo ajustável por GEMINI_MODEL.")}
+          {row("ANTHROPIC_API_KEY", cfg?.ai, "Opção paga. Modelo ajustável por ANTHROPIC_MODEL. Com as duas chaves, AI_PROVIDER escolhe.")}
         </ul>
       </section>
     </div>

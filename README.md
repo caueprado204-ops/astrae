@@ -25,7 +25,10 @@ Sem nenhuma chave a plataforma já funciona em **modo local**: todas as fontes p
 | `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Login e banco do usuário (protegidos por RLS) | Supabase → Settings → API |
 | `SUPABASE_SERVICE_ROLE_KEY` | Cache persistente das APIs (opcional) | Supabase → Settings → API |
 | `GEOCODER_CONTACT` | Contato exigido pelo Nominatim/OSM na busca de lugares | seu e-mail |
-| `ANTHROPIC_API_KEY` | ASTRAE AI | https://console.anthropic.com |
+| `GEMINI_API_KEY` | ASTRAE AI — opção **gratuita** (Google Gemini Flash) | https://aistudio.google.com |
+| `GEMINI_MODEL` | Opcional — padrão `gemini-3.8-flash` | https://ai.google.dev/gemini-api/docs/models |
+| `ANTHROPIC_API_KEY` | ASTRAE AI — opção paga por uso | https://console.anthropic.com |
+| `AI_PROVIDER` | Com as duas chaves: `gemini` ou `anthropic` (padrão `gemini`) | — |
 | `ANTHROPIC_MODEL` | Opcional — padrão `claude-opus-5-5` | https://platform.claude.com/docs/en/models/overview |
 
 Nenhuma chave secreta usa o prefixo `NEXT_PUBLIC_`; todas as requisições autenticadas passam pelas rotas `/api/*`.
@@ -111,10 +114,11 @@ Observação científica: o *status oficial* do CPC e o *episódio pelo critéri
 
 **15. Settings** — tema escuro/claro, perfil e quais chaves estão configuradas (sem expor valores).
 
-**16. ASTRAE AI** (`/ai`, rota `POST /api/ai`) — assistente com uso de ferramentas (tool use da API da Anthropic). O modelo não responde de memória: ele chama dez ferramentas que executam os mesmos serviços verificados da plataforma (status ENSO e série ONI, Niño semanal, clima REMS, status dos rovers, capitais e previsão CPTEC, séries e climatologia NASA POWER, busca de datasets no CMR e de relatórios no NTRS).
+**16. ASTRAE AI** (`/ai`, rota `POST /api/ai`) — assistente com uso de ferramentas, funcionando com **Google Gemini** (plano gratuito) ou **Anthropic Claude** — o provedor é escolhido pela chave configurada. O modelo não responde de memória: ele chama dez ferramentas que executam os mesmos serviços verificados da plataforma (status ENSO e série ONI, Niño semanal, clima REMS, status dos rovers, capitais e previsão CPTEC, séries e climatologia NASA POWER, busca de datasets no CMR e de relatórios no NTRS).
 - Cada fonte consultada recebe um ID (`S1`, `S2`…) e o modelo é obrigado a citá-lo; depois da resposta, o servidor **remove qualquer citação a uma fonte que não foi de fato consultada** e avisa na tela.
 - Explicações de mecanismos físicos só são aceitas com apoio em relatório retornado pelo NTRS; o tipo do dado (observado, previsão, modelo, índice) é sempre declarado.
 - A tela mostra a resposta, as fontes citadas com instituição, dataset e data de acesso, e a lista de consultas feitas. “Salvar no caderno” cria uma página com a pergunta, a resposta e as referências.
+- No plano gratuito do Gemini, o Google pode usar perguntas e respostas para melhorar os produtos dele; não envie dados pessoais ao assistente.
 - Segurança e custo: a chave fica só no servidor; com Supabase configurado, só usuários logados usam o assistente; limite de 20 perguntas a cada 10 minutos por usuário.
 
 Gráficos (ECharts): linha, área, barras, dispersão, séries temporais e comparação com eixo duplo; zoom, hover, seleção e exportação **PNG, CSV e JSON** — o CSV e o JSON levam o cabeçalho de proveniência.

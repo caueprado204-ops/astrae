@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { aiConfigured, aiModel, askAstrae, type ChatTurn } from "@/services/ai/agent";
+import { aiConfigured, aiModel, aiProvider, askAstrae, type ChatTurn } from "@/services/ai/agent";
 import { getServerClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/supabase/env";
 
@@ -12,12 +12,12 @@ const g = globalThis as unknown as { __aiHits?: Map<string, number[]> };
 const hits: Map<string, number[]> = g.__aiHits ?? (g.__aiHits = new Map());
 
 export function GET() {
-  return NextResponse.json({ configured: aiConfigured(), model: aiConfigured() ? aiModel() : null });
+  return NextResponse.json({ configured: aiConfigured(), provider: aiProvider(), model: aiConfigured() ? aiModel() : null });
 }
 
 export async function POST(req: Request) {
   if (!aiConfigured()) {
-    return NextResponse.json({ status: "error", error: "ASTRAE AI não configurado: defina ANTHROPIC_API_KEY no .env.local do servidor." }, { status: 503 });
+    return NextResponse.json({ status: "error", error: "ASTRAE AI não configurado: defina GEMINI_API_KEY (gratuita) ou ANTHROPIC_API_KEY nas variáveis de ambiente do servidor." }, { status: 503 });
   }
 
   // Quando há Supabase, o assistente exige login (evita uso anônimo da chave do servidor).
@@ -46,7 +46,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ status: "ok", ...r, answeredAt: new Date().toISOString() });
   } catch (e) {
     const err = e as { status?: number; message?: string };
-    const msg = err.status === 401 ? "Chave ANTHROPIC_API_KEY inválida." : err.status === 429 ? "Limite da API da Anthropic atingido. Tente em instantes." : `Falha ao consultar o modelo: ${err.message}`;
+    const who = aiProvider() === "gemini" ? "GEMINI_API_KEY" : "ANTHROPIC_API_KEY";
+    const msg = err.status === 401 || err.status === 403 ? `Chave ${who} inválida ou sem permissão.`
+      : err.status === 429 ? "Limite de uso do provedor de IA atingido (no plano gratuito do Gemini há cota diária). Tente mais tarde."
+      : err.status === 404 ? "Modelo de IA não encontrado — confira GEMINI_MODEL/ANTHROPIC_MODEL."
+      : `Falha ao consultar o modelo: ${err.message}`;
     return NextResponse.json({ status: "error", error: msg }, { status: 502 });
   }
 }
