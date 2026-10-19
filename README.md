@@ -62,13 +62,14 @@ app/
   page.tsx                 landing
   login/  auth/callback/   autenticação Supabase
   (app)/                   overview, search, earth, climate, enso, mars, planetary,
-                           maps, data, research, research/[id], notebook, saved, sources, settings
+                           maps, data, study, study/video/[id], research, research/[id], notebook, saved, sources, settings
   api/
     nasa/        apod · images · cmr · ntrs · power · gibs/layers
     mars/        weather · rovers/[rover]
     enso/        oni · weekly · status
     brazil-climate/  (índice) · cities · forecast · capitals · historical
     noaa/        datasets · stations · daily
+    study/video  vídeo + legenda oficial (NASA Image and Video Library)
     ai · search · sources · geocode · settings
 services/
   nasa/ mars/ enso/ inpe/ noaa/ climate/ search/ sources/ ai/   (cada integração independente)
@@ -120,6 +121,11 @@ Observação científica: o *status oficial* do CPC e o *episódio pelo critéri
 - A tela mostra a resposta, as fontes citadas com instituição, dataset e data de acesso, e a lista de consultas feitas. “Salvar no caderno” cria uma página com a pergunta, a resposta e as referências.
 - No plano gratuito do Gemini, o Google pode usar perguntas e respostas para melhorar os produtos dele; não envie dados pessoais ao assistente.
 - Segurança e custo: a chave fica só no servidor; com Supabase configurado, só usuários logados usam o assistente; limite de 20 perguntas a cada 10 minutos por usuário.
+
+**17. Study** (`/study`) — área de estudo ligada às pesquisas.
+- **Trilhas de estudo**: ENSO, tempo e clima no Brasil, observação da Terra por satélite, mudança do clima, Marte e Sistema Solar. Cada trilha junta videoaulas (busca ao vivo no acervo da NASA), relatórios técnicos do NTRS com "Adicionar à pesquisa", leituras em sites oficiais (links conferidos), atalhos para as ferramentas de dados e perguntas que abrem o ASTRAE AI já preenchido. As trilhas não trazem números próprios.
+- **Videoteca NASA**: busca livre de vídeos na NASA Image and Video Library.
+- **Player de videoaula** (`/study/video/[id]`): vídeo em várias resoluções pelos endpoints `/search?nasa_id=`, `/asset/{nasa_id}` e `/captions/{nasa_id}`, com transcrição clicável e pesquisável (legenda oficial em SRT ou VTT convertida no servidor), anotações com marcação de tempo, opção de citar um trecho, "Salvar no caderno" (nota com anotações e referência) e salvar o vídeo em um projeto.
 
 Gráficos (ECharts): linha, área, barras, dispersão, séries temporais e comparação com eixo duplo; zoom, hover, seleção e exportação **PNG, CSV e JSON** — o CSV e o JSON levam o cabeçalho de proveniência.
 

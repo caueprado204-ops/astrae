@@ -1,5 +1,5 @@
 import {
-  Activity, Bookmark, BookOpen, Cloud, Database, FlaskConical, Globe2, LayoutDashboard, Map, Orbit, Search, Settings, Waves, Network, Telescope, Sparkles
+  Activity, Bookmark, BookOpen, Cloud, Database, FlaskConical, Globe2, LayoutDashboard, Map, Orbit, Search, Settings, Waves, Network, Telescope, Sparkles, GraduationCap
 } from "lucide-react";
 
 export const NAV = [
@@ -13,6 +13,7 @@ export const NAV = [
   { href: "/planetary", label: "Planetary", icon: Telescope },
   { href: "/maps", label: "Maps", icon: Map },
   { href: "/data", label: "Data", icon: Database },
+  { href: "/study", label: "Study", icon: GraduationCap },
   { href: "/research", label: "Research", icon: FlaskConical },
   { href: "/notebook", label: "Notebook", icon: BookOpen },
   { href: "/saved", label: "Saved datasets", icon: Bookmark },

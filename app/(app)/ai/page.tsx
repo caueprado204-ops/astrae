@@ -64,6 +64,8 @@ export default function AstraeAI() {
   const [cfg, setCfg] = useState<{ configured: boolean; provider: string | null; model: string | null } | null>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
+  // permite abrir o assistente com uma pergunta pronta (ex.: vindo da aba Study)
+  useEffect(() => { const q = new URLSearchParams(window.location.search).get("q"); if (q) setInput(q.slice(0, 2000)); }, []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { sb, user, configured: dbConfigured } = useUser();
