@@ -27,6 +27,12 @@
   --bad: 229 72 77;
   --nino: 242 153 74;
   --nina: 74 144 226;
+  /* cartões coloridos do painel (bento): tons profundos no escuro */
+  --tint-earth: 16 38 66;  --tint-earth-ink: 150 205 255;
+  --tint-mars: 58 26 18;   --tint-mars-ink: 255 170 130;
+  --tint-sand: 54 44 24;   --tint-sand-ink: 240 205 140;
+  --tint-lilac: 36 30 64;  --tint-lilac-ink: 196 180 255;
+  --tint-mint: 16 48 40;   --tint-mint-ink: 140 230 190;
   color-scheme: dark;
 }
 :root[data-theme="light"] {
@@ -44,6 +50,12 @@
   --bad: 200 40 50;
   --nino: 214 110 30;
   --nina: 30 104 200;
+  /* tons pastel no claro */
+  --tint-earth: 222 236 252;  --tint-earth-ink: 24 92 160;
+  --tint-mars: 251 228 216;   --tint-mars-ink: 160 64 28;
+  --tint-sand: 247 238 210;   --tint-sand-ink: 130 96 20;
+  --tint-lilac: 233 228 250;  --tint-lilac-ink: 92 70 170;
+  --tint-mint: 220 242 230;   --tint-mint-ink: 22 120 80;
   color-scheme: light;
 }
 /* cenas espaciais (landing, cabeçalhos) são sempre noturnas, em qualquer tema */
@@ -87,6 +99,9 @@ body {
   .btn-glass { @apply inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-5 py-2 text-sm text-white backdrop-blur-md transition-all hover:border-white/60 hover:bg-white/10; }
   .input { @apply w-full rounded-xl border border-line bg-bg/60 px-3 py-2 text-sm text-ink placeholder:text-faint focus:border-accent/70 focus:outline-none; }
   .label { @apply text-xs text-dim; }
+  .bento { @apply rounded-3xl border border-line/60 bg-panel/80 backdrop-blur-md; box-shadow: inset 0 1px 0 rgb(255 255 255 / .05), 0 18px 50px -30px rgb(0 0 0 / .55); }
+  .chip { @apply inline-flex items-center gap-1 rounded-full border border-line bg-panel2/70 px-3 py-1 text-xs text-dim transition-colors hover:text-ink; }
+  .chip[aria-pressed="true"] { @apply border-transparent bg-ink text-bg; }
   .readout { @apply font-mono tabular text-ink; }
 }
 
@@ -104,3 +119,13 @@ body {
 .astrae-twinkle { animation: astrae-twinkle 4s ease-in-out infinite; }
 @keyframes astrae-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 .astrae-rise { animation: astrae-rise .9s cubic-bezier(.2,.8,.2,1) both; }
+
+.tint { background: rgb(var(--t)); color: rgb(var(--ink)); }
+.tint .tint-ink { color: rgb(var(--ti)); }
+.tint-earth { --t: var(--tint-earth); --ti: var(--tint-earth-ink); }
+.tint-mars  { --t: var(--tint-mars);  --ti: var(--tint-mars-ink); }
+.tint-sand  { --t: var(--tint-sand);  --ti: var(--tint-sand-ink); }
+.tint-lilac { --t: var(--tint-lilac); --ti: var(--tint-lilac-ink); }
+.tint-mint  { --t: var(--tint-mint);  --ti: var(--tint-mint-ink); }
+/* no tema claro a área logada fica clara e arejada, como um painel */
+:root[data-theme="light"] .bento, :root[data-theme="light"] .panel { box-shadow: 0 1px 0 rgb(255 255 255 / .8) inset, 0 12px 32px -22px rgb(20 40 80 / .35); }
