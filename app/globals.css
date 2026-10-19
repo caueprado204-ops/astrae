@@ -13,10 +13,10 @@
   nino   #F2994A / nina #4A90E2 — escala divergente ENSO
 */
 :root, :root[data-theme="dark"] {
-  --bg: 7 11 20;
-  --panel: 13 20 36;
-  --panel2: 18 27 47;
-  --line: 28 39 64;
+  --bg: 4 7 15;
+  --panel: 11 17 32;
+  --panel2: 17 26 46;
+  --line: 30 42 68;
   --ink: 230 236 247;
   --dim: 138 151 178;
   --faint: 84 97 125;
@@ -46,6 +46,9 @@
   --nina: 30 104 200;
   color-scheme: light;
 }
+/* cenas espaciais (landing, cabeçalhos) são sempre noturnas, em qualquer tema */
+:root { --space: 3 7 15; }
+.space-scene { background-color: rgb(var(--space)); color: #fff; }
 
 html, body { background: rgb(var(--bg)); color: rgb(var(--ink)); }
 body {
@@ -55,24 +58,34 @@ body {
 }
 :root[data-theme="dark"] body, :root:not([data-theme]) body {
   background-image:
-    radial-gradient(1px 1px at 12% 18%, rgb(230 236 247 / .35), transparent 60%),
-    radial-gradient(1px 1px at 72% 8%, rgb(230 236 247 / .25), transparent 60%),
-    radial-gradient(1px 1px at 88% 64%, rgb(230 236 247 / .2), transparent 60%),
-    radial-gradient(1px 1px at 34% 82%, rgb(230 236 247 / .2), transparent 60%),
-    radial-gradient(1200px 600px at 80% -10%, rgb(111 211 255 / .06), transparent 70%);
+    radial-gradient(1px 1px at 12% 18%, rgb(230 236 247 / .45), transparent 60%),
+    radial-gradient(1px 1px at 72% 8%, rgb(230 236 247 / .35), transparent 60%),
+    radial-gradient(1.5px 1.5px at 88% 64%, rgb(230 236 247 / .35), transparent 60%),
+    radial-gradient(1px 1px at 34% 82%, rgb(230 236 247 / .3), transparent 60%),
+    radial-gradient(1px 1px at 52% 44%, rgb(230 236 247 / .25), transparent 60%),
+    radial-gradient(1px 1px at 6% 66%, rgb(230 236 247 / .3), transparent 60%),
+    radial-gradient(1.5px 1.5px at 64% 92%, rgb(230 236 247 / .3), transparent 60%),
+    radial-gradient(1px 1px at 94% 28%, rgb(230 236 247 / .3), transparent 60%),
+    radial-gradient(1400px 700px at 85% -15%, rgb(70 140 255 / .10), transparent 70%),
+    radial-gradient(900px 500px at -10% 110%, rgb(111 211 255 / .06), transparent 70%);
   background-attachment: fixed;
 }
 
 .font-display { font-family: "Space Grotesk", "Inter Tight", sans-serif; letter-spacing: -0.02em; }
+/* tipografia larga de missão espacial — títulos e marca */
+.font-wide { font-family: "Michroma", "Space Grotesk", sans-serif; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; }
+.eyebrow { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; }
 .tabular { font-variant-numeric: tabular-nums; }
 
 :focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; border-radius: 4px; }
 
 @layer components {
-  .panel { @apply rounded-md border border-line bg-panel; }
-  .btn { @apply inline-flex items-center gap-2 rounded-md border border-line bg-panel2 px-3 py-1.5 text-sm text-ink transition-colors hover:border-accent/60 disabled:opacity-50; }
-  .btn-primary { @apply inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-medium text-bg transition-opacity hover:opacity-90 disabled:opacity-50; }
-  .input { @apply w-full rounded-md border border-line bg-bg/60 px-3 py-2 text-sm text-ink placeholder:text-faint focus:border-accent/70 focus:outline-none; }
+  /* painéis de vidro com borda iluminada no topo */
+  .panel { @apply rounded-2xl border border-line/70 bg-panel/75 backdrop-blur-md; box-shadow: inset 0 1px 0 rgb(255 255 255 / .05), 0 10px 40px -20px rgb(0 0 0 / .6); }
+  .btn { @apply inline-flex items-center gap-2 rounded-full border border-line bg-panel2/70 px-3.5 py-1.5 text-sm text-ink backdrop-blur transition-all hover:border-accent/60 hover:bg-panel2 disabled:opacity-50; }
+  .btn-primary { @apply inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2 text-sm font-medium text-bg transition-all hover:bg-accent disabled:opacity-50; box-shadow: 0 0 24px -6px rgb(var(--accent) / .55); }
+  .btn-glass { @apply inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-5 py-2 text-sm text-white backdrop-blur-md transition-all hover:border-white/60 hover:bg-white/10; }
+  .input { @apply w-full rounded-xl border border-line bg-bg/60 px-3 py-2 text-sm text-ink placeholder:text-faint focus:border-accent/70 focus:outline-none; }
   .label { @apply text-xs text-dim; }
   .readout { @apply font-mono tabular text-ink; }
 }
@@ -86,3 +99,8 @@ body {
 
 @keyframes stripe-in { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 .stripe { transform-origin: bottom; animation: stripe-in .9s cubic-bezier(.2,.8,.2,1) both; }
+
+@keyframes astrae-twinkle { 0%, 100% { opacity: .9; } 50% { opacity: .2; } }
+.astrae-twinkle { animation: astrae-twinkle 4s ease-in-out infinite; }
+@keyframes astrae-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.astrae-rise { animation: astrae-rise .9s cubic-bezier(.2,.8,.2,1) both; }

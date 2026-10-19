@@ -24,7 +24,8 @@ const config: Config = {
       fontFamily: {
         sans: ["'Inter Tight'", "Inter", "system-ui", "sans-serif"],
         mono: ["'JetBrains Mono'", "ui-monospace", "monospace"],
-        display: ["'Space Grotesk'", "'Inter Tight'", "sans-serif"]
+        display: ["'Space Grotesk'", "'Inter Tight'", "sans-serif"],
+        wide: ["Michroma", "'Space Grotesk'", "sans-serif"]
       },
       letterSpacing: { label: "0.14em" }
     }

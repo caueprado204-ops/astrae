@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Logo } from "@/components/shell/Logo";
+import { Planet, Stars } from "@/components/visual/Space";
 import { getBrowserClient } from "@/lib/supabase/client";
 
 function LoginForm() {
@@ -64,11 +65,14 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="grid min-h-screen place-items-center px-4">
-      <div className="w-full max-w-sm">
-        <Link href="/" className="mb-8 flex items-center gap-2"><Logo /><span className="font-display font-semibold tracking-[0.08em]">ASTRAE</span></Link>
-        <h1 className="font-display text-2xl">Scientific Intelligence for Earth &amp; Space</h1>
-        <p className="mb-6 mt-1 text-sm text-dim">Entre para salvar projetos, datasets e cadernos. Seus dados são privados por padrão.</p>
+    <div className="space-scene relative isolate grid min-h-screen place-items-center overflow-hidden px-4 py-10">
+      <Stars count={160} seed={808} dust={20} height={70} />
+      <Planet tone="earth" top="74%" width="max(1400px, 170vw)" />
+      <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(0deg, rgba(3,7,15,.85), transparent 55%)" }} />
+      <div className="astrae-rise relative w-full max-w-sm rounded-3xl border border-white/10 bg-[#070c18]/75 p-7 shadow-2xl backdrop-blur-xl" data-theme="dark">
+        <Link href="/" className="mb-7 flex items-center gap-2.5"><Logo /><span className="font-wide text-sm tracking-[0.2em] text-white">ASTRAE</span></Link>
+        <h1 className="font-wide text-lg leading-snug text-white">Earth &amp; Space<br />Research</h1>
+        <p className="mb-6 mt-2 text-sm text-white/65">Entre para salvar projetos, datasets e cadernos. Seus dados são privados por padrão.</p>
         <Suspense><LoginForm /></Suspense>
       </div>
     </div>
