@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { LogIn, LogOut, Menu, X } from "lucide-react";
-import { NAV } from "./nav";
+import { NAV_GROUPS } from "./nav";
 import { Logo } from "./Logo";
 import { useUser } from "@/hooks/useUser";
 import { Planet, Stars, type Tone } from "@/components/visual/Space";
@@ -15,18 +15,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, configured, sb } = useUser();
 
   const nav = (
-    <nav aria-label="Principal" className="flex flex-col gap-0.5">
-      {NAV.map(({ href, label, icon: Icon }) => {
-        const active = path === href || path.startsWith(href + "/");
-        return (
-          <Link key={href} href={href} onClick={() => setOpen(false)}
-            className={`group flex items-center gap-2.5 rounded-full px-3 py-1.5 text-[13.5px] transition-all ${active ? "bg-white/[.07] text-ink shadow-[inset_0_0_0_1px_rgb(var(--accent)/.35),0_0_18px_-6px_rgb(var(--accent)/.6)]" : "text-dim hover:bg-white/[.03] hover:text-ink"}`}
-            aria-current={active ? "page" : undefined}>
-            <Icon size={15} className={active ? "text-accent" : "text-faint group-hover:text-dim"} />
-            {label}
-          </Link>
-        );
-      })}
+    <nav aria-label="Principal" className="flex flex-col gap-4">
+      {NAV_GROUPS.map((g) => (
+        <div key={g.label}>
+          <p className="eyebrow px-3 pb-1 text-[10px] text-faint">{g.label}</p>
+          <div className="flex flex-col gap-0.5">
+            {g.items.map(({ href, label, icon: Icon }) => {
+              const active = path === href || path.startsWith(href + "/");
+              return (
+                <Link key={href} href={href} onClick={() => setOpen(false)}
+                  className={`group flex items-center gap-2.5 rounded-full px-3 py-1.5 text-[13.5px] transition-all ${active ? "bg-white/[.07] text-ink shadow-[inset_0_0_0_1px_rgb(var(--accent)/.35),0_0_18px_-6px_rgb(var(--accent)/.6)]" : "text-dim hover:bg-white/[.03] hover:text-ink"}`}
+                  aria-current={active ? "page" : undefined}>
+                  <Icon size={15} className={active ? "text-accent" : "text-faint group-hover:text-dim"} />
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </nav>
   );
 
@@ -58,7 +65,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </header>
         {open && (
           <div className="fixed inset-0 z-50 bg-bg/70 backdrop-blur-sm lg:hidden" onClick={() => setOpen(false)}>
-            <div className="h-full w-64 border-r border-line bg-bg/95 p-4 backdrop-blur-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="h-full w-64 overflow-y-auto border-r border-line bg-bg/95 p-4 backdrop-blur-xl" onClick={(e) => e.stopPropagation()}>
               <div className="mb-4 flex justify-end"><button onClick={() => setOpen(false)} aria-label="Fechar menu"><X size={20} /></button></div>
               {nav}
               <div className="mt-6">{account}</div>
@@ -72,14 +79,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 }
 
 const TONE_BY_PATH: [RegExp, Tone, string][] = [
-  [/^\/mars/, "mars", "Planetary · Mars"],
-  [/^\/planetary/, "ice", "Planetary"],
-  [/^\/ai/, "aurora", "Assistente"],
-  [/^\/(enso|climate)/, "earth", "Clima"],
-  [/^\/(earth|maps)/, "earth", "Terra"],
-  [/^\/(study)/, "aurora", "Estudo"],
-  [/^\/(research|notebook|saved)/, "ice", "Laboratório"],
-  [/^\/(search|data|sources)/, "earth", "Dados"],
+  [/^\/health/, "earth", "Eixo A · Clima, ambiente e saúde pública"],
+  [/^\/territory/, "earth", "Eixo B · Clima, território e vulnerabilidade"],
+  [/^\/mars/, "mars", "Espaço · Marte"],
+  [/^\/planetary/, "ice", "Espaço"],
+  [/^\/ai/, "aurora", "Pesquisa · Assistente"],
+  [/^\/(enso|climate|earth|maps)/, "earth", "Observatório ambiental"],
+  [/^\/(data|search)/, "earth", "Pesquisa · Laboratório de dados"],
+  [/^\/(study)/, "aurora", "Caderno · Estudo"],
+  [/^\/(research|notebook|saved)/, "ice", "Caderno científico"],
+  [/^\/(sources|about)/, "ice", "Plataforma"],
   [/^\/settings/, "ice", "Conta"]
 ];
 

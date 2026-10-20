@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, ChevronDown, Cloud, Database, FlaskConical, GraduationCap, LineChart, Map, Orbit, Search } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronDown, Cloud, Database, FlaskConical, GraduationCap, HeartPulse, LineChart, Map, MapPinned, Orbit, Search } from "lucide-react";
 import { Logo } from "@/components/shell/Logo";
 import { OniStripes } from "@/components/landing/OniStripes";
 import { LiveReadouts } from "@/components/landing/LiveReadouts";
@@ -10,14 +10,14 @@ const GIBS = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best";
 const TREK = "https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0/default/default028mm/0/0";
 
 const SECTIONS = [
-  { icon: Search, title: "Pesquisa científica", text: "Uma busca que atravessa catálogos da NASA Earthdata, relatórios técnicos, acervo de imagens e as séries ao vivo da plataforma — com a origem de cada resultado à vista.", href: "/search" },
-  { icon: Cloud, title: "Monitoramento climático", text: "Previsão oficial do CPTEC/INPE, condições atuais nas capitais e séries diárias desde 1981 para qualquer ponto do Brasil.", href: "/climate" },
-  { icon: Orbit, title: "Exploração planetária", text: "Clima medido pelo Curiosity sol a sol, imagens brutas dos rovers e o mapa global de Marte do NASA Trek.", href: "/mars" },
-  { icon: Database, title: "Dados oficiais", text: "NASA, NOAA e INPE consultados pelo backend, com cache e status de conexão de cada fonte.", href: "/sources" },
-  { icon: Map, title: "Mapas interativos", text: "Camadas de satélite do NASA GIBS — temperatura, chuva, nuvens, aerossóis, TSM — com escolha e comparação de datas.", href: "/maps" },
-  { icon: LineChart, title: "Gráficos e séries temporais", text: "Zoom, comparação entre variáveis e exportação em PNG, CSV e JSON, sempre com o cabeçalho de proveniência.", href: "/data" },
-  { icon: FlaskConical, title: "Laboratório de pesquisa", text: "Projetos com hipótese, perguntas, dados e referências salvos diretamente dos resultados.", href: "/research" },
-  { icon: BookOpen, title: "Caderno científico", text: "Páginas com observação, metodologia, resultados, discussão e conclusão — e gráficos e mapas incorporados.", href: "/notebook" }
+  { icon: Database, title: "Laboratório de dados", text: "Escolha fonte, variável, lugar e período; gere séries, mapas e tabelas e exporte com o cabeçalho de proveniência.", href: "/data" },
+  { icon: LineChart, title: "Análise exploratória", text: "Estatísticas descritivas, perfil sazonal e correlação com defasagem — com n efetivo, faltantes e limitações à vista.", href: "/health" },
+  { icon: FlaskConical, title: "Investigações estruturadas", text: "Pergunta, hipótese, método, resultados, limitações e referências, com status de revisão e relatório exportável.", href: "/research" },
+  { icon: BookOpen, title: "Caderno científico", text: "Notas com gráficos e mapas ao vivo, ligadas às investigações.", href: "/notebook" },
+  { icon: Cloud, title: "Observatório ambiental", text: "Previsão e condições do CPTEC/INPE, El Niño e La Niña pela NOAA e camadas de satélite da NASA.", href: "/climate" },
+  { icon: Map, title: "Mapas interativos", text: "Camadas de satélite do NASA GIBS e mapas municipais do IBGE, com comparação de datas e indicadores.", href: "/maps" },
+  { icon: Search, title: "Biblioteca de dados", text: "Cobertura, acesso, frequência e limitações de cada fonte — e o status de conexão verificado a cada 10 minutos.", href: "/sources" },
+  { icon: Orbit, title: "Espaço", text: "Os módulos originais da ASTRAE: clima de Marte, rovers e acervo planetário da NASA.", href: "/mars" }
 ];
 
 export default function Landing() {
@@ -25,10 +25,10 @@ export default function Landing() {
     <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
       <Link href="/" className="flex items-center gap-2.5"><Logo /><span className="font-wide text-sm tracking-[0.2em]">ASTRAE</span></Link>
       <nav className="flex items-center gap-5 text-[12px] uppercase tracking-[0.16em] text-white/70">
-        <Link href="/earth" className="hidden hover:text-white md:inline">Terra</Link>
-        <Link href="/mars" className="hidden hover:text-white md:inline">Marte</Link>
-        <Link href="/enso" className="hidden hover:text-white md:inline">Clima</Link>
-        <Link href="/study" className="hidden hover:text-white md:inline">Estudar</Link>
+        <Link href="/health" className="hidden hover:text-white md:inline">Clima e Saúde</Link>
+        <Link href="/territory" className="hidden hover:text-white md:inline">Território</Link>
+        <Link href="/sources" className="hidden hover:text-white md:inline">Dados</Link>
+        <Link href="/about" className="hidden hover:text-white md:inline">Sobre</Link>
         <Link href="/login" className="hover:text-white">Entrar</Link>
       </nav>
     </div>
@@ -42,7 +42,7 @@ export default function Landing() {
           <p className="font-wide mt-3 text-[15px] text-white sm:text-lg">Explore · Observe · Understand</p>
           <div className="mt-6 flex flex-wrap justify-center gap-2.5">
             <Link href="/overview" className="btn-glass">Explorar plataforma <ArrowRight size={15} /></Link>
-            <Link href="/study" className="btn-glass hidden sm:inline-flex">Estudar</Link>
+            <Link href="/health" className="btn-glass hidden sm:inline-flex">Estudo piloto</Link>
           </div>
           <a href="#leituras" aria-label="Rolar para baixo" className="mx-auto mt-6 block w-fit text-white/50 hover:text-white"><ChevronDown size={22} /></a>
         </div>
@@ -52,9 +52,9 @@ export default function Landing() {
         <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr] lg:items-end">
           <div>
             <p className="eyebrow text-dim">Missão</p>
-            <h2 className="font-wide mt-2 text-[28px] leading-tight sm:text-[40px]">Terra, clima<br />e espaço</h2>
+            <h2 className="font-wide mt-2 text-[28px] leading-tight sm:text-[40px]">Clima, ambiente<br />e saúde</h2>
             <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-dim">
-              Uma plataforma científica para explorar dados da Terra, do clima e do sistema planetário em um único ambiente de pesquisa — com dados reais da NASA, NOAA e INPE e a fonte de cada número à vista.
+              Um ambiente independente de pesquisa para investigar como clima e ambiente se relacionam com a saúde da população e com desigualdades no território — com dados oficiais da NASA, NOAA, INPE, IBGE e da vigilância em saúde, e a fonte de cada número à vista.
             </p>
           </div>
           <LiveReadouts />
@@ -71,10 +71,10 @@ export default function Landing() {
           <ImageCard className="md:row-span-2" eyebrow="Oceano · GHRSST MUR L4" title="Temperatura do mar" href="/maps"
             img={`${GIBS}/GHRSST_L4_MUR_Sea_Surface_Temperature/default/default/GoogleMapsCompatible_Level7/0/0/0.png`}
             alt="Temperatura da superfície do mar, análise GHRSST MUR mais recente (NASA GIBS)" note="Imagem mais recente servida pelo NASA GIBS." />
-          <Link href="/search" className="group relative overflow-hidden rounded-3xl bg-accent p-6 text-bg">
-            <Search size={22} />
-            <h3 className="font-wide mt-6 text-xl leading-snug">Pesquisa científica</h3>
-            <p className="mt-2 text-sm leading-relaxed opacity-80">Catálogos da NASA Earthdata, relatórios técnicos, acervo de imagens e séries ao vivo em uma busca só.</p>
+          <Link href="/health" className="group relative overflow-hidden rounded-3xl bg-accent p-6 text-bg">
+            <HeartPulse size={22} />
+            <h3 className="font-wide mt-6 text-xl leading-snug">Clima e Saúde</h3>
+            <p className="mt-2 text-sm leading-relaxed opacity-80">Temperatura e chuva × indicadores públicos de saúde por município e semana. Piloto: dengue em Campinas.</p>
             <ArrowRight size={18} className="absolute bottom-6 right-6 transition group-hover:translate-x-1" />
           </Link>
           <ImageCard eyebrow="Marte · Viking MDIM 2.1" title="Planeta vermelho" href="/mars" mars
@@ -82,10 +82,10 @@ export default function Landing() {
           <ImageCard eyebrow="Atmosfera · MERRA-2" title="Temperatura do ar" href="/maps"
             img={`${GIBS}/MERRA2_2m_Air_Temperature_Monthly/default/default/GoogleMapsCompatible_Level6/0/0/0.png`}
             alt="Temperatura do ar a 2 metros, média mensal MERRA-2 (NASA GIBS)" note="Reanálise, último mês disponível." />
-          <Link href="/study" className="group relative overflow-hidden rounded-3xl border border-line/70 bg-[#e7c590] p-6 text-[#1b1206]">
-            <GraduationCap size={22} />
-            <h3 className="font-wide mt-6 text-xl leading-snug">Estudar</h3>
-            <p className="mt-2 text-sm leading-relaxed opacity-80">Videoaulas oficiais da NASA com transcrição, trilhas por tema e anotações que vão direto para o seu caderno.</p>
+          <Link href="/territory" className="group relative overflow-hidden rounded-3xl border border-line/70 bg-[#e7c590] p-6 text-[#1b1206]">
+            <MapPinned size={22} />
+            <h3 className="font-wide mt-6 text-xl leading-snug">Território</h3>
+            <p className="mt-2 text-sm leading-relaxed opacity-80">Exposição climática, Censo 2022 e saúde no mapa dos municípios, com índice exploratório de pesos visíveis.</p>
             <ArrowRight size={18} className="absolute bottom-6 right-6 transition group-hover:translate-x-1" />
           </Link>
         </div>

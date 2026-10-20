@@ -33,6 +33,7 @@ export default function Overview() {
   const status = useApi<{ status: string; synopsis?: string }>("/api/enso/status");
   const mars = useApi<{ sols: Sol[] }>("/api/mars/weather");
   const caps = useApi<{ rows: Capital[] }>("/api/brazil-climate/capitals");
+  const dengue = useApi<{ weeks: { se: number; cases: number | null }[] }>("/api/health/arbovirus?geocode=3509502&disease=dengue");
   const { sb, user } = useUser();
   const [sources, setSources] = useState<SourceStatus[] | null>(null);
   const [counts, setCounts] = useState<{ projects: number; saved: number; notes: number } | null>(null);
@@ -66,16 +67,22 @@ export default function Overview() {
     const last = oni.data[oni.data.length - 1].year;
     return oni.data.filter((r) => r.year > last - range).map((r) => ({ t: `${r.season} ${r.year}`, v: r.anomaly }));
   }, [oni.data, range]);
-  const marsSeries: Series[] = useMemo(() => !mars.data ? [] : [
-    { id: "max", label: "Máx. do ar", unit: "°C", kind: "OBSERVED", points: mars.data.sols.slice(-120).map((x) => ({ t: `Sol ${x.sol}`, v: x.maxTemp })) },
-    { id: "min", label: "Mín. do ar", unit: "°C", kind: "OBSERVED", points: mars.data.sols.slice(-120).map((x) => ({ t: `Sol ${x.sol}`, v: x.minTemp })) }
-  ], [mars.data]);
+  const dengueSeries: Series[] = useMemo(() => !dengue.data ? [] : [
+    { id: "dengue", label: "Casos notificados", unit: "casos", kind: "OBSERVED", points: dengue.data.weeks.slice(-78).map((w) => ({ t: `${Math.floor(w.se / 100)}-SE${String(w.se % 100).padStart(2, "0")}`, v: w.cases })) }
+  ], [dengue.data]);
   const shownSources = (sources || []).filter((x) => srcFilter === "all" || (srcFilter === "connected" ? x.state === "connected" : x.state !== "connected"));
   const firstName = user?.email?.split("@")[0];
 
   return (
     <div>
-      <PageHeader title="Overview" subtitle={firstName ? `Bem-vindo de volta, ${firstName}. Cada leitura abaixo é consultada agora na fonte oficial.` : "Status geral — cada leitura é consultada agora na fonte oficial e leva o link de origem."} />
+      <PageHeader title="Início" subtitle={firstName ? `Bem-vindo de volta, ${firstName}. Cada leitura abaixo é consultada agora na fonte oficial.` : "Status geral — cada leitura é consultada agora na fonte oficial e leva o link de origem."} />
+
+      <div className="mb-4 grid gap-4 md:grid-cols-2">
+        <AxisCard href="/health" eyebrow="Eixo A" title="Clima, ambiente e saúde pública" tone="tint-sand"
+          text="Temperatura, chuva e umidade × indicadores públicos de saúde, por município e semana epidemiológica." foot="Piloto em andamento: temperatura e dengue em Campinas (SP), 2015–2025" />
+        <AxisCard href="/territory" eyebrow="Eixo B" title="Clima, território e vulnerabilidade" tone="tint-earth"
+          text="Exposição climática, características sociais (Censo 2022) e saúde lado a lado no mapa, com índice exploratório transparente." foot="Comece pela região imediata de um município" />
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-12">
         {/* ── Destaque: ONI ── */}
@@ -175,13 +182,14 @@ export default function Overview() {
 
         {/* ── Gráficos ── */}
         <section className="bento p-5 lg:col-span-8">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="font-display text-lg">Temperatura do ar na Cratera Gale</h2>
-            <span className="chip">últimos 120 sols</span>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-display text-lg">Dengue em Campinas (SP) — casos notificados por semana</h2>
+            <Link href="/health" className="chip">Abrir o estudo piloto →</Link>
           </div>
-          {marsSeries.length > 0 && <SeriesChart series={marsSeries} height={250} provenance={mars.env?.provenance} title="gale-air-temp" />}
-          {mars.state === "error" && <p className="py-10 text-sm text-dim">Fonte temporariamente indisponível.</p>}
-          <Provenance p={mars.env?.provenance} compact storedAt={mars.env?.cache?.storedAt} stale={mars.env?.cache?.stale} />
+          <p className="mt-1 text-xs text-dim">Série do estudo piloto. Semanas mais recentes ainda são revisadas pela vigilância.</p>
+          {dengueSeries.length > 0 && <SeriesChart series={dengueSeries} type="bar" height={240} provenance={dengue.env?.provenance} title="dengue-campinas" />}
+          {dengue.state === "error" && <p className="py-10 text-sm text-dim">Fonte temporariamente indisponível.</p>}
+          <Provenance p={dengue.env?.provenance} compact storedAt={dengue.env?.cache?.storedAt} stale={dengue.env?.cache?.stale} />
         </section>
 
         <section className="bento p-5 lg:col-span-4">
@@ -195,6 +203,17 @@ export default function Overview() {
         </section>
       </div>
     </div>
+  );
+}
+
+function AxisCard({ href, eyebrow, title, text, foot, tone }: { href: string; eyebrow: string; title: string; text: string; foot: string; tone: string }) {
+  return (
+    <Link href={href} className={`tint ${tone} group block rounded-3xl p-5 transition hover:-translate-y-0.5 sm:p-6`}>
+      <p className="eyebrow text-dim">{eyebrow}</p>
+      <h2 className="mt-2 text-xl font-medium leading-snug">{title}</h2>
+      <p className="mt-2 text-sm leading-relaxed text-dim">{text}</p>
+      <p className="tint-ink mt-4 flex items-center gap-2 text-sm">{foot} <ArrowRight size={14} className="transition group-hover:translate-x-1" /></p>
+    </Link>
   );
 }
 

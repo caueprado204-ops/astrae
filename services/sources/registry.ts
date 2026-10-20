@@ -47,8 +47,20 @@ export const SOURCES: SourceDef[] = [
     docs: CDO_DOCS, probe: `${CDO_BASE}/datasets?limit=1`, needsKey: () => !noaaConfigured() },
   { id: "inpe-cptec", institution: "CPTEC/INPE", api: "Serviço XML de previsão", dataset: "Previsão municipal e condições atuais",
     docs: "http://servicos.cptec.inpe.br/XML/", probe: `${CPTEC_BASE}/capitais/condicoesAtuais.xml` },
-  { id: "inmet", institution: "INMET", api: "API Tempo / BDMEP", dataset: "Estações meteorológicas",
-    docs: "https://portal.inmet.gov.br/manual", pending: "Integration pending — exige token institucional." }
+  { id: "inmet", institution: "INMET", api: "Dados históricos (BDMEP) / API Tempo", dataset: "Estações meteorológicas automáticas",
+    docs: "https://portal.inmet.gov.br/dadoshistoricos", pending: "Integration pending — histórico publicado em arquivos ZIP anuais (todas as estações); a API em tempo real exige token institucional." },
+  { id: "infodengue", institution: "Fiocruz / FGV EMAp", api: "InfoDengue — alertcity", dataset: "Dengue, chikungunya e zika por município e semana",
+    docs: "https://info.dengue.mat.br/services/api/doc", probe: "https://info.dengue.mat.br/api/alertcity?geocode=3509502&disease=dengue&format=json&ew_start=1&ew_end=1&ey_start=2024&ey_end=2024" },
+  { id: "ibge-localidades", institution: "IBGE", api: "API de Localidades v1", dataset: "Municípios, UFs e regiões geográficas",
+    docs: "https://servicodados.ibge.gov.br/api/docs/localidades", probe: "https://servicodados.ibge.gov.br/api/v1/localidades/municipios/3509502" },
+  { id: "ibge-malhas", institution: "IBGE", api: "API de Malhas v3", dataset: "Limites municipais (GeoJSON)",
+    docs: "https://servicodados.ibge.gov.br/api/docs/malhas?versao=3", probe: "https://servicodados.ibge.gov.br/api/v3/malhas/municipios/3509502?formato=application/vnd.geo+json&qualidade=minima" },
+  { id: "ibge-sidra", institution: "IBGE", api: "API SIDRA", dataset: "Censo 2022 (4714, 9514) e PIB dos Municípios (5938)",
+    docs: "https://apisidra.ibge.gov.br/", probe: "https://apisidra.ibge.gov.br/values/t/4714/n6/3509502/v/93/p/2022" },
+  { id: "datasus-sim", institution: "DATASUS / Ministério da Saúde", api: "SIM — Sistema de Informações sobre Mortalidade", dataset: "Declarações de óbito",
+    docs: "https://pysus.readthedocs.io/en/latest/databases/SIM.html", pending: "Integration pending — sem API; arquivos DBC por UF e ano. Roteiro de agregação em scripts/datasus/ (não executado)." },
+  { id: "datasus-sih", institution: "DATASUS / Ministério da Saúde", api: "SIH/SUS — internações hospitalares", dataset: "AIH reduzidas",
+    docs: "https://pysus.readthedocs.io/en/latest/databases/data-sources.html", pending: "Integration pending — sem API; arquivos mensais por UF. Mesmo roteiro do SIM." }
 ];
 
 export interface SourceStatus extends Omit<SourceDef, "probe" | "needsKey" | "note" | "pending"> {

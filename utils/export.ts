@@ -32,3 +32,19 @@ export function seriesToJson(series: Series[], p?: Provenance | null) {
 }
 
 export const slug = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 60);
+
+/** Tabela genérica em CSV, com o mesmo cabeçalho de proveniência e linhas extras de método. */
+export function rowsToCsv(columns: { key: string; label: string }[], rows: Record<string, unknown>[], p?: Provenance | null, notes: string[] = []) {
+  const header: string[] = [];
+  if (p) {
+    header.push(`# source: ${p.source}`, `# institution: ${p.institution}`, `# dataset: ${p.dataset}`, `# kind: ${p.kind}`,
+      `# original_url: ${p.originalUrl}`, `# accessed_at: ${p.accessedAt}`);
+    if (p.apiEndpoint) header.push(`# api: ${p.apiEndpoint}`);
+    if (p.location) header.push(`# location: ${p.location}`);
+    if (p.period) header.push(`# period: ${p.period}`);
+    if (p.methodology) header.push(`# methodology: ${p.methodology.replace(/\n/g, " ")}`);
+  }
+  notes.forEach((n) => header.push(`# note: ${n}`));
+  const body = rows.map((r) => columns.map((c) => { const v = r[c.key]; return v == null ? "" : esc(String(v)); }).join(","));
+  return [...header, columns.map((c) => esc(c.label)).join(","), ...body].join("\n");
+}

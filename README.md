@@ -2,7 +2,7 @@
 
 **Explore. Observe. Understand.**
 
-Plataforma de pesquisa científica que consulta, organiza e visualiza dados reais da NASA, NOAA e INPE. Nenhum número é inventado: todo valor exibido carrega fonte, instituição, dataset, unidade, local, período, data de acesso e o tipo do dado (Observed · Forecast · Model · Estimate · Index · Imagery). Dados de exemplo só existem se marcados como **DEMO DATA** — o código de produção não usa nenhum.
+Plataforma independente de pesquisa científica que integra clima, meio ambiente e saúde pública em dois eixos — **Clima e Saúde** e **Território e Vulnerabilidade** — com dados oficiais da NASA, NOAA, INPE, IBGE e da vigilância em saúde (InfoDengue). Os módulos de espaço originais foram preservados. Nenhum número é inventado: todo valor exibido carrega fonte, instituição, dataset, unidade, local, período, data de acesso e o tipo do dado (Observed · Forecast · Model · Estimate · Index · Imagery). Dados de exemplo só existem se marcados como **DEMO DATA** — o código de produção não usa nenhum.
 
 ---
 
@@ -36,7 +36,7 @@ Nenhuma chave secreta usa o prefixo `NEXT_PUBLIC_`; todas as requisições auten
 ### Banco de dados (Supabase / PostgreSQL)
 
 1. Crie um projeto em https://supabase.com.
-2. No SQL Editor, rode `supabase/migrations/0001_astrae_schema.sql` (cópia em `database/schema.sql`).
+2. No SQL Editor, rode `supabase/migrations/0001_astrae_schema.sql` e depois `supabase/migrations/0002_research_structure.sql` (investigações estruturadas e sugestões; cópia de tudo em `database/schema.sql`).
 3. Em Authentication → URL Configuration, adicione `http://localhost:3000/auth/callback` (e o domínio de produção).
 
 Tabelas: `profiles` (users), `projects` (researches), `research_items`, `notes`, `saved_datasets`, `saved_searches`, `tags`, `note_tags`, `sources`, `datasets`, `observations`, `api_cache`. Todo conteúdo pessoal tem RLS `user_id = auth.uid()`; nada é público por padrão.
@@ -130,6 +130,20 @@ Observação científica: o *status oficial* do CPC e o *episódio pelo critéri
 Gráficos (ECharts): linha, área, barras, dispersão, séries temporais e comparação com eixo duplo; zoom, hover, seleção e exportação **PNG, CSV e JSON** — o CSV e o JSON levam o cabeçalho de proveniência.
 
 ---
+
+## Reestruturação socioambiental (outubro de 2026)
+
+Detalhes em [`docs/REESTRUTURACAO.md`](docs/REESTRUTURACAO.md) (auditoria, diagnóstico, arquitetura, priorização) e [`docs/PILOTO_CAMPINAS.md`](docs/PILOTO_CAMPINAS.md).
+
+**18. Clima e Saúde** (`/health`, eixo A) — município (IBGE), agravo (dengue, chikungunya, zika), período, variável climática e defasagem. Casos semanais do InfoDengue × clima diário do NASA POWER agregado nas mesmas semanas epidemiológicas; séries alinhadas, correlação com defasagem (bruta e sem sazonalidade), dispersão, perfil sazonal, descritivas, exportação CSV/JSON e "Adicionar à pesquisa". Já vem configurado com o **estudo piloto de Campinas**.
+
+**19. Território** (`/territory`, eixo B) — municípios da região geográfica imediata (IBGE) ou escolhidos à mão; mapa coroplético (malha do IBGE) por indicador: temperatura máxima e chuva (POWER), população e densidade (Censo 2022), % de 65+ (Censo 2022), PIB per capita (PIB dos Municípios ÷ Censo), incidência de dengue (InfoDengue). Índice exploratório com pesos e direções visíveis, aviso quando municípios compartilham a mesma célula climática, exportação CSV/GeoJSON.
+
+**20. Investigações estruturadas** — pergunta, justificativa, hipótese, objetivos, fontes, metodologia, resultados, limitações, referências e próximas etapas; eixo e status de revisão com parecer; relatório Markdown e impressão/PDF que separam conteúdo dos autores do conteúdo gerado pela plataforma. Modelo pronto do piloto.
+
+**21. Biblioteca de dados e Sobre** — ficha de cada fonte (dados, acesso, cobertura, atualização, limitações, integração) junto ao status ao vivo; página com missão, princípios, o que a plataforma não faz, ausência de vínculo institucional e formulário de sugestões para pesquisadores.
+
+**Pendências documentadas:** SIM/SIH (roteiro em `scripts/datasus/`, não executado), estações do INMET (arquivos anuais), focos de queimadas do INPE (acesso não verificado).
 
 ## Limites conhecidos
 
